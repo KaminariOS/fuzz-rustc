@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 set -x
 
 if [ ! -d rust ]; then
-    git clone https://github.com/dwrensha/rust.git --branch fuzz
+    git clone https://github.com/KaminariOS/rust.git --branch fuzz
 fi
 
 rustup override set nightly
@@ -50,12 +50,14 @@ export CFG_VERSION=`rustc --version | cut -f2- -d ' '`
 
 # Usually we can use the precompiled libstd from rustup.
 TOOLCHAIN_ROOT=${RUSTUP_BASE:-$HOME/.rustup}/toolchains/nightly-$TARGET
+TOOLCHAIN_ROOT=$(dirname $(dirname $(which rustc)))
 
 # If a metadata change has landed on master and is not yet in a nightly release,
 # we may need to compile our own libstd. `./x.py build --stage 1` should suffice.
 # If fuzzing immediately fails on an empty input, this is a good thing to try.
 # (Note that you will also need to change CFG_VERSION, above.)
-#TOOLCHAIN_ROOT=$HOME/src/rust/build/x86_64-unknown-linux-gnu/stage1/
+TOOLCHAIN_ROOT=$PWD/rust/build/x86_64-unknown-linux-gnu/stage1
+echo $TOOLCHAIN_ROOT
 
 # Custom environment variable indicating where to look for the precompiled libstd.
 export FUZZ_RUSTC_LIBRARY_DIR=$TOOLCHAIN_ROOT/lib/rustlib/$TARGET/lib
